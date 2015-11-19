@@ -57,6 +57,10 @@
     <Compile Include="Migrations\201511191912293_FirstMigration.Designer.cs">
       <DependentUpon>201511191912293_FirstMigration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201511191939382_SquareIds.cs" />
+    <Compile Include="Migrations\201511191939382_SquareIds.Designer.cs">
+      <DependentUpon>201511191939382_SquareIds.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Tip.cs" />
@@ -71,6 +75,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201511191912293_FirstMigration.resx">
       <DependentUpon>201511191912293_FirstMigration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201511191939382_SquareIds.resx">
+      <DependentUpon>201511191939382_SquareIds.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
