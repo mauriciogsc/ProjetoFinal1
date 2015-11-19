@@ -25,25 +25,27 @@ namespace ProjetoFinal1.Controllers
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
             BancoContext db = new BancoContext();
+            List<Banco.Models.Tip> tiplist = new List<Banco.Models.Tip>();
+            List<Banco.Models.User> userlist = new List<Banco.Models.User>();
+            List<Banco.Models.Venue> venuelist = new List<Banco.Models.Venue>();
             Dictionary<string, string> parametros = new Dictionary<string, string>();
             List<FourSquare.SharpSquare.Entities.Venue> venues = new List<FourSquare.SharpSquare.Entities.Venue>();
             List<FourSquare.SharpSquare.Entities.Tip> tips = new List<FourSquare.SharpSquare.Entities.Tip>();
             parametros.Add("limit", "500"); // tentando pegar ateh 500 venues e tips
-
-            for (double lon = -43.1903; lon > -43.2275; lon -= 0.0001)
+            for (double lat = -22.9856; lat < -22.9452; lat += 0.0001)
             {
-                parametros.Add("ll", "-22.9842," + lon.ToString().Replace(',', '.'));
+                parametros.Add("ll",lat.ToString().Replace(',', '.') +",-43.1900" );
                 venues = sharpSquare.SearchVenues(parametros);
 
                 foreach (FourSquare.SharpSquare.Entities.Venue v in venues)
                 {
                     Banco.Models.Venue ven;
                     ven = db.Venues.FirstOrDefault(f => f.SquareId == v.id);
-                    if (ven == null)
+                    if (ven == null && venuelist.FirstOrDefault(f => f.SquareId == v.id) == null)
                     {
                         ven = new Banco.Models.Venue();
                         ven.SquareId = v.id;
-
+                        venuelist.Add(ven);
                         db.Venues.Add(ven);
                     }
                     ven.Name = v.name;
@@ -54,13 +56,13 @@ namespace ProjetoFinal1.Controllers
                         Banco.Models.Tip tip;
                         //Verifica de tip já foi adicionada anteriormente no banco
                         tip = db.Tips.FirstOrDefault(f => f.SquareId == t.id);
-                        if (tip == null)
+                        if (tip == null && tiplist.FirstOrDefault(f => f.SquareId == t.id) == null)
                         {
                             //Se é uma tip nova cria uma e adiciona no context
                             tip = new Banco.Models.Tip();
                             tip.SquareId = t.id;
                             tip.Venue = ven;
-
+                            tiplist.Add(tip);
                             db.Tips.Add(tip);
 
                         }
@@ -68,17 +70,22 @@ namespace ProjetoFinal1.Controllers
                         tip.Description = t.text;
                         Banco.Models.User user;
                         user = db.Users.FirstOrDefault(f => f.SquareId == t.user.id);
-                        if (user == null)
+                        if (user == null && userlist.FirstOrDefault(f=>f.SquareId == t.user.id)==null)
                         {
                             user = new Banco.Models.User();
                             user.SquareId = t.user.id;
                             user.Name = t.user.firstName;
+                            userlist.Add(user);
                             db.Users.Add(user);
                         }
+                        if (user == null && userlist.FirstOrDefault(f => f.SquareId == t.user.id) != null)
+                        {
+                            user = userlist.FirstOrDefault(f => f.SquareId == t.user.id);
+                        }
                         tip.User = user;
-                        db.SaveChanges();
                     }
                 }
+                db.SaveChanges();
             }
             ViewBag.Message = "Venues, tips e users para a coordenada -22.9843,-43.2018 adicionados ao banco com sucesso.";
             return View();
