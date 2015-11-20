@@ -61,8 +61,17 @@
     <Compile Include="Migrations\201511191939382_SquareIds.Designer.cs">
       <DependentUpon>201511191939382_SquareIds.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201511192325221_VenueCategories.cs" />
+    <Compile Include="Migrations\201511192325221_VenueCategories.Designer.cs">
+      <DependentUpon>201511192325221_VenueCategories.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201511200004198_hasmenu.cs" />
+    <Compile Include="Migrations\201511200004198_hasmenu.Designer.cs">
+      <DependentUpon>201511200004198_hasmenu.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
+    <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Tip.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Venue.cs" />
@@ -78,6 +87,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201511191939382_SquareIds.resx">
       <DependentUpon>201511191939382_SquareIds.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201511192325221_VenueCategories.resx">
+      <DependentUpon>201511192325221_VenueCategories.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201511200004198_hasmenu.resx">
+      <DependentUpon>201511200004198_hasmenu.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

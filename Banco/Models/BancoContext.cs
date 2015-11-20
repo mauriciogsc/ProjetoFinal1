@@ -10,7 +10,8 @@ namespace Banco.Models
     public class BancoContext: DbContext
     {
         public DbSet<User> Users { get; set; } 
-        public DbSet<Venue> Venues { get; set; } 
-        public DbSet<Tip> Tips { get; set; } 
+        public DbSet<Venue> Venues { get; set; }
+        public DbSet<Tip> Tips { get; set; }
+        public DbSet<Category> Categories { get; set; } 
     }
 }

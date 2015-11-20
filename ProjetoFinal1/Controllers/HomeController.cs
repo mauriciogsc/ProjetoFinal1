@@ -15,16 +15,25 @@ namespace ProjetoFinal1.Controllers
         string clientId = "V0LRK1PVS30TMTHFQNUFWCZC5C4ZBE4J02O5EXF4O421FIAI";
         string clientSecret = "REP3R12EZYWKOA0PPTMBSFSU5SRGS1UBV2VZVVOW2VIWGZB0";
         string redirectUri = "REDIRECT_URI";
+        BancoContext db = new BancoContext();
 
         public ActionResult Index()
         {
+            SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
+            List<Banco.Models.Venue> venues = db.Venues.ToList();
+            foreach (Banco.Models.Venue v in venues)
+            {
+                FourSquare.SharpSquare.Entities.Venue venSquare = sharpSquare.GetVenue(v.SquareId);
+                if (venSquare.menu != null)
+                    v.HasMenu = true;
+                db.SaveChanges();
+            }
             return View();
         }
 
         public ActionResult About()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
-            BancoContext db = new BancoContext();
             List<Banco.Models.Tip> tiplist = new List<Banco.Models.Tip>();
             List<Banco.Models.User> userlist = new List<Banco.Models.User>();
             List<Banco.Models.Venue> venuelist = new List<Banco.Models.Venue>();
@@ -93,8 +102,37 @@ namespace ProjetoFinal1.Controllers
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+            SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
+            List<Banco.Models.Venue> venues = db.Venues.Include("Categories").ToList();
+            foreach (Banco.Models.Venue v in venues)
+            {
+                FourSquare.SharpSquare.Entities.Venue venSquare = sharpSquare.GetVenue(v.SquareId);
+                if(venSquare.categories!=null)
+                {
+                    foreach (FourSquare.SharpSquare.Entities.Category c in venSquare.categories)
+                    {
+                        Banco.Models.Category cat;
+                        cat = db.Categories.FirstOrDefault(f => f.SquareId == c.id);
+                        if (cat == null)
+                        {
+                            cat = new Banco.Models.Category();
+                            cat.Name = c.name;
+                            cat.SquareId = c.id;
+                            v.Categories.Add(cat);
+                        }
+                        else
+                        {
+                            if (v.Categories.Where(w => w.SquareId == c.id) == null || v.Categories.Where(w => w.SquareId == c.id).Count()==0)
+                            {
+                                v.Categories.Add(cat);
+                            }
 
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+            ViewBag.Message = "Venues, tips e users para a coordenada -22.9843,-43.2018 adicionados ao banco com sucesso.";
             return View();
         }
     }
