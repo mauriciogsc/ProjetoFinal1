@@ -283,7 +283,7 @@ namespace FourSquare.SharpSquare.Core
         /// </summary>
         public User GetUser(string userId)
         {
-            return GetSingle<User>("/users/" + userId).response["user"];
+            return GetSingle<User>("/users/" + userId, true).response["user"];
         }
 
         /// <summary>

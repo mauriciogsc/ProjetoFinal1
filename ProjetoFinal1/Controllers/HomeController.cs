@@ -16,19 +16,87 @@ namespace ProjetoFinal1.Controllers
         string clientSecret = "REP3R12EZYWKOA0PPTMBSFSU5SRGS1UBV2VZVVOW2VIWGZB0";
         string redirectUri = "REDIRECT_URI";
         BancoContext db = new BancoContext();
+        public void venues()
+        {
+            SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
+            BancoContext db = new BancoContext();
+            int lastid = 0;
+            Dictionary<string, string> parametros = new Dictionary<string, string>();
+            //while (true)
+            //{
+            //    int min = DateTime.Now.Minute;
+            //    System.Threading.Thread.Sleep(60000);
+            //    if (min == 0)
+            //    {
 
+            List<Banco.Models.Venue> lisVenue = db.Venues.Where(w => w.updated.Year<1950).ToList();
+
+            foreach (Banco.Models.Venue ven in lisVenue)
+            {
+                try
+                {
+                    FourSquare.SharpSquare.Entities.Venue v = new FourSquare.SharpSquare.Entities.Venue();
+                    lastid = ven.Id;
+                    v = sharpSquare.GetVenue(ven.SquareId);
+                    ven.checkincount =(int) v.stats.checkinsCount;
+                    ven.tipcount = (int)v.stats.tipCount;
+                    ven.rate = v.rating;
+                    if(v.price!=null)
+                        ven.tier = v.price.tier;
+                    ven.likes = (int)v.likes.count;
+                    ven.updated = DateTime.Now;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    if (e.Message == "O servidor remoto retornou um erro: (403) Proibido.")
+                    {
+                        break;
+                    }
+                }
+            }
+        }
         public ActionResult Index()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
-            List<Banco.Models.Venue> venues = db.Venues.ToList();
-            foreach (Banco.Models.Venue v in venues)
+            BancoContext db = new BancoContext();
+            int lastid = 13027;
+            Dictionary<string, string> parametros = new Dictionary<string, string>();
+            //while (true)
+            //{
+            //    int min = DateTime.Now.Minute;
+            //    System.Threading.Thread.Sleep(60000);
+            //    if (min == 0)
+            //    {
+
+            List<Banco.Models.User> lisUser = db.Users.Where(w => w.Sexo == null && w.Id > lastid).ToList();
+
+            foreach (Banco.Models.User usuario in lisUser)
             {
-                FourSquare.SharpSquare.Entities.Venue venSquare = sharpSquare.GetVenue(v.SquareId);
-                if (venSquare.menu != null)
-                    v.HasMenu = true;
-                db.SaveChanges();
+                try
+                {
+                    FourSquare.SharpSquare.Entities.User us = new FourSquare.SharpSquare.Entities.User();
+                    lastid = usuario.Id;
+                    us = sharpSquare.GetUser(usuario.SquareId);
+                    usuario.Sexo = us.gender;
+                    usuario.countAmigos = (int)us.friends.count;
+                    usuario.countCheckin = (int)us.checkins.count;
+                    usuario.countTip = (int)us.tips.count;
+                    usuario.cidadeNatal = us.homeCity;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    if (e.Message == "O servidor remoto retornou um erro: (403) Proibido.")
+                    {
+                        break;
+                    }
+                }
             }
+            //    }
+            //}
             return View();
+
         }
 
         public ActionResult About()
@@ -41,9 +109,13 @@ namespace ProjetoFinal1.Controllers
             List<FourSquare.SharpSquare.Entities.Venue> venues = new List<FourSquare.SharpSquare.Entities.Venue>();
             List<FourSquare.SharpSquare.Entities.Tip> tips = new List<FourSquare.SharpSquare.Entities.Tip>();
             parametros.Add("limit", "500"); // tentando pegar ateh 500 venues e tips
-            for (double lat = -22.9856; lat < -22.9452; lat += 0.0001)
+
+            for (double lon = -43.2652; lon < -43.2475; lon += 0.0005)
             {
-                parametros.Add("ll",lat.ToString().Replace(',', '.') +",-43.1900" );
+
+                parametros.Remove("limit");
+                parametros.Add("limit", "50");
+                parametros.Add("ll", "-22.8707," + lon.ToString().Replace(',', '.'));
                 venues = sharpSquare.SearchVenues(parametros);
 
                 foreach (FourSquare.SharpSquare.Entities.Venue v in venues)
@@ -54,11 +126,15 @@ namespace ProjetoFinal1.Controllers
                     {
                         ven = new Banco.Models.Venue();
                         ven.SquareId = v.id;
+                        ven.lat = -22.8707;
+                        ven.lon = lon;
                         venuelist.Add(ven);
                         db.Venues.Add(ven);
                     }
                     ven.Name = v.name;
                     parametros.Remove("ll");
+                    parametros.Remove("limit");
+                    parametros.Add("limit", "500");
                     tips = sharpSquare.GetVenueTips(v.id, parametros);
                     foreach (FourSquare.SharpSquare.Entities.Tip t in tips)
                     {
@@ -79,7 +155,7 @@ namespace ProjetoFinal1.Controllers
                         tip.Description = t.text;
                         Banco.Models.User user;
                         user = db.Users.FirstOrDefault(f => f.SquareId == t.user.id);
-                        if (user == null && userlist.FirstOrDefault(f=>f.SquareId == t.user.id)==null)
+                        if (user == null && userlist.FirstOrDefault(f => f.SquareId == t.user.id) == null)
                         {
                             user = new Banco.Models.User();
                             user.SquareId = t.user.id;
@@ -96,41 +172,44 @@ namespace ProjetoFinal1.Controllers
                 }
                 db.SaveChanges();
             }
-            ViewBag.Message = "Venues, tips e users para a coordenada -22.9843,-43.2018 adicionados ao banco com sucesso.";
+            ViewBag.Message = "Venues, tips e users adicionados ao banco com sucesso.";
             return View();
         }
 
         public ActionResult Contact()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
-            List<Banco.Models.Venue> venues = db.Venues.Include("Categories").ToList();
+            List<Banco.Models.Venue> venues = db.Venues.Include("Categories").Where(w => w.Id > 5734).ToList();
             foreach (Banco.Models.Venue v in venues)
             {
-                FourSquare.SharpSquare.Entities.Venue venSquare = sharpSquare.GetVenue(v.SquareId);
-                if(venSquare.categories!=null)
+                if (v.Categories == null || v.Categories.Count == 0)
                 {
-                    foreach (FourSquare.SharpSquare.Entities.Category c in venSquare.categories)
+                    FourSquare.SharpSquare.Entities.Venue venSquare = sharpSquare.GetVenue(v.SquareId);
+                    if (venSquare.categories != null)
                     {
-                        Banco.Models.Category cat;
-                        cat = db.Categories.FirstOrDefault(f => f.SquareId == c.id);
-                        if (cat == null)
+                        foreach (FourSquare.SharpSquare.Entities.Category c in venSquare.categories)
                         {
-                            cat = new Banco.Models.Category();
-                            cat.Name = c.name;
-                            cat.SquareId = c.id;
-                            v.Categories.Add(cat);
-                        }
-                        else
-                        {
-                            if (v.Categories.Where(w => w.SquareId == c.id) == null || v.Categories.Where(w => w.SquareId == c.id).Count()==0)
+                            Banco.Models.Category cat;
+                            cat = db.Categories.FirstOrDefault(f => f.SquareId == c.id);
+                            if (cat == null)
                             {
+                                cat = new Banco.Models.Category();
+                                cat.Name = c.name;
+                                cat.SquareId = c.id;
                                 v.Categories.Add(cat);
                             }
+                            else
+                            {
+                                if (v.Categories.Where(w => w.SquareId == c.id) == null || v.Categories.Where(w => w.SquareId == c.id).Count() == 0)
+                                {
+                                    v.Categories.Add(cat);
+                                }
 
+                            }
+                            db.SaveChanges();
                         }
                     }
                 }
-                db.SaveChanges();
             }
             ViewBag.Message = "Venues, tips e users para a coordenada -22.9843,-43.2018 adicionados ao banco com sucesso.";
             return View();

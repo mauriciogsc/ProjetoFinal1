@@ -69,6 +69,22 @@
     <Compile Include="Migrations\201511200004198_hasmenu.Designer.cs">
       <DependentUpon>201511200004198_hasmenu.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201511272327410_latlon.cs" />
+    <Compile Include="Migrations\201511272327410_latlon.Designer.cs">
+      <DependentUpon>201511272327410_latlon.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606252337306_CamposUsuario.cs" />
+    <Compile Include="Migrations\201606252337306_CamposUsuario.Designer.cs">
+      <DependentUpon>201606252337306_CamposUsuario.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606262327143_VenueData.cs" />
+    <Compile Include="Migrations\201606262327143_VenueData.Designer.cs">
+      <DependentUpon>201606262327143_VenueData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201606262336547_TierEData.cs" />
+    <Compile Include="Migrations\201606262336547_TierEData.Designer.cs">
+      <DependentUpon>201606262336547_TierEData.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Category.cs" />
@@ -93,6 +109,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201511200004198_hasmenu.resx">
       <DependentUpon>201511200004198_hasmenu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201511272327410_latlon.resx">
+      <DependentUpon>201511272327410_latlon.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606252337306_CamposUsuario.resx">
+      <DependentUpon>201606252337306_CamposUsuario.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606262327143_VenueData.resx">
+      <DependentUpon>201606262327143_VenueData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201606262336547_TierEData.resx">
+      <DependentUpon>201606262336547_TierEData.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
