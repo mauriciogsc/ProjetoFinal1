@@ -15,5 +15,6 @@ namespace Banco.Models
         public virtual User User { get; set; }
         public int VenueId { get; set; }
         public virtual Venue Venue { get; set; }
+        public int status { get; set; }
     }
 }

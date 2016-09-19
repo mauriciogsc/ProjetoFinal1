@@ -16,20 +16,14 @@ namespace ProjetoFinal1.Controllers
         string clientSecret = "REP3R12EZYWKOA0PPTMBSFSU5SRGS1UBV2VZVVOW2VIWGZB0";
         string redirectUri = "REDIRECT_URI";
         BancoContext db = new BancoContext();
-        public void venues()
+        public ActionResult venues()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
             BancoContext db = new BancoContext();
             int lastid = 0;
             Dictionary<string, string> parametros = new Dictionary<string, string>();
-            //while (true)
-            //{
-            //    int min = DateTime.Now.Minute;
-            //    System.Threading.Thread.Sleep(60000);
-            //    if (min == 0)
-            //    {
 
-            List<Banco.Models.Venue> lisVenue = db.Venues.Where(w => w.updated.Year<1950).ToList();
+            List<Banco.Models.Venue> lisVenue = db.Venues.Where(w => w.updated.Year < 1950).ToList();
 
             foreach (Banco.Models.Venue ven in lisVenue)
             {
@@ -38,10 +32,10 @@ namespace ProjetoFinal1.Controllers
                     FourSquare.SharpSquare.Entities.Venue v = new FourSquare.SharpSquare.Entities.Venue();
                     lastid = ven.Id;
                     v = sharpSquare.GetVenue(ven.SquareId);
-                    ven.checkincount =(int) v.stats.checkinsCount;
+                    ven.checkincount = (int)v.stats.checkinsCount;
                     ven.tipcount = (int)v.stats.tipCount;
                     ven.rate = v.rating;
-                    if(v.price!=null)
+                    if (v.price != null)
                         ven.tier = v.price.tier;
                     ven.likes = (int)v.likes.count;
                     ven.updated = DateTime.Now;
@@ -51,55 +45,78 @@ namespace ProjetoFinal1.Controllers
                 {
                     if (e.Message == "O servidor remoto retornou um erro: (403) Proibido.")
                     {
+                        ViewBag.Message = e.Message;
                         break;
                     }
                 }
             }
+            return View();
+        }
+
+        public ActionResult setPositivo(int id)
+        {
+            Banco.Models.Tip tp = db.Tips.Find(id);
+            tp.status = 1;
+            db.SaveChanges();
+            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
+
+
+            int count = qry.Count(); // 1st round-trip
+            int index = new Random().Next(count);
+
+            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
+            ViewBag.TipId = newtip.Id;
+            ViewBag.Tip = newtip.Description;
+            return RedirectToAction("Index");
+        }
+        public ActionResult setNeutro(int id)
+        {
+            Banco.Models.Tip tp = db.Tips.Find(id);
+            tp.status = 2;
+            db.SaveChanges();
+            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
+
+
+            int count = qry.Count(); // 1st round-trip
+            int index = new Random().Next(count);
+
+            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
+            ViewBag.TipId = newtip.Id;
+            ViewBag.Tip = newtip.Description;
+            return RedirectToAction("Index");
+        }
+        public ActionResult setNegativo(int id)
+        {
+            Banco.Models.Tip tp = db.Tips.Find(id);
+            tp.status = 3;
+            db.SaveChanges();
+            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
+
+
+            int count = qry.Count(); // 1st round-trip
+            int index = new Random().Next(count);
+
+            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
+            ViewBag.TipId = newtip.Id;
+            ViewBag.Tip = newtip.Description;
+            return RedirectToAction("Index");
         }
         public ActionResult Index()
         {
-            SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
-            BancoContext db = new BancoContext();
-            int lastid = 13027;
-            Dictionary<string, string> parametros = new Dictionary<string, string>();
-            //while (true)
-            //{
-            //    int min = DateTime.Now.Minute;
-            //    System.Threading.Thread.Sleep(60000);
-            //    if (min == 0)
-            //    {
+            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o=>o.Id);
+           
 
-            List<Banco.Models.User> lisUser = db.Users.Where(w => w.Sexo == null && w.Id > lastid).ToList();
+            int count = qry.Count(); // 1st round-trip
+            int index = new Random().Next(count);
 
-            foreach (Banco.Models.User usuario in lisUser)
-            {
-                try
-                {
-                    FourSquare.SharpSquare.Entities.User us = new FourSquare.SharpSquare.Entities.User();
-                    lastid = usuario.Id;
-                    us = sharpSquare.GetUser(usuario.SquareId);
-                    usuario.Sexo = us.gender;
-                    usuario.countAmigos = (int)us.friends.count;
-                    usuario.countCheckin = (int)us.checkins.count;
-                    usuario.countTip = (int)us.tips.count;
-                    usuario.cidadeNatal = us.homeCity;
-                    db.SaveChanges();
-                }
-                catch (Exception e)
-                {
-                    if (e.Message == "O servidor remoto retornou um erro: (403) Proibido.")
-                    {
-                        break;
-                    }
-                }
-            }
-            //    }
-            //}
+            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
+            ViewBag.TipId = newtip.Id;
+            ViewBag.Tip = newtip.Description;
             return View();
 
         }
 
-        public ActionResult About()
+        public ActionResult AdicionarTips()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
             List<Banco.Models.Tip> tiplist = new List<Banco.Models.Tip>();
@@ -176,7 +193,7 @@ namespace ProjetoFinal1.Controllers
             return View();
         }
 
-        public ActionResult Contact()
+        public ActionResult PreencheCategorias()
         {
             SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
             List<Banco.Models.Venue> venues = db.Venues.Include("Categories").Where(w => w.Id > 5734).ToList();
@@ -211,7 +228,41 @@ namespace ProjetoFinal1.Controllers
                     }
                 }
             }
-            ViewBag.Message = "Venues, tips e users para a coordenada -22.9843,-43.2018 adicionados ao banco com sucesso.";
+            ViewBag.Message = "Preenche Categorias dos estabelecimentos.";
+            return View();
+        }
+
+        public ActionResult PreencherUsuarios()
+        {
+            SharpSquare sharpSquare = new SharpSquare(clientId, clientSecret);
+            BancoContext db = new BancoContext();
+            int lastid = 13027;
+            Dictionary<string, string> parametros = new Dictionary<string, string>();
+
+            List<Banco.Models.User> lisUser = db.Users.Where(w => w.Sexo == null && w.Id > lastid).ToList();
+
+            foreach (Banco.Models.User usuario in lisUser)
+            {
+                try
+                {
+                    FourSquare.SharpSquare.Entities.User us = new FourSquare.SharpSquare.Entities.User();
+                    lastid = usuario.Id;
+                    us = sharpSquare.GetUser(usuario.SquareId);
+                    usuario.Sexo = us.gender;
+                    usuario.countAmigos = (int)us.friends.count;
+                    usuario.countCheckin = (int)us.checkins.count;
+                    usuario.countTip = (int)us.tips.count;
+                    usuario.cidadeNatal = us.homeCity;
+                    db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    if (e.Message == "O servidor remoto retornou um erro: (403) Proibido.")
+                    {
+                        break;
+                    }
+                }
+            }
             return View();
         }
     }

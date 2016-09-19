@@ -85,6 +85,10 @@
     <Compile Include="Migrations\201606262336547_TierEData.Designer.cs">
       <DependentUpon>201606262336547_TierEData.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201609191943163_TipStatus.cs" />
+    <Compile Include="Migrations\201609191943163_TipStatus.Designer.cs">
+      <DependentUpon>201609191943163_TipStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Category.cs" />
@@ -121,6 +125,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201606262336547_TierEData.resx">
       <DependentUpon>201606262336547_TierEData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201609191943163_TipStatus.resx">
+      <DependentUpon>201609191943163_TipStatus.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
