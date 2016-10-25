@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.IO;
 
 namespace ProjetoFinal1.Controllers
 {
@@ -53,57 +54,96 @@ namespace ProjetoFinal1.Controllers
             return View();
         }
 
+        public ActionResult readPredictFromFile()
+        {
+            List<char> listaPredict = new List<char>();
+            List<string> listId = new List<string>();
+            try
+            {   // Open the text file using a stream reader.
+                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\UnclassPredict.txt"))
+                {
+                    // Read the stream to a string, and write the string to the console.
+                    sr.ReadLine();
+                    sr.ReadLine();
+                    sr.ReadLine();
+                    sr.ReadLine();
+                    sr.ReadLine();
+                    while (!sr.EndOfStream)
+                    {
+                        string line = sr.ReadLine();
+                        listaPredict.Add(line[25]);
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(e.Message);
+            }
+            try
+            {   // Open the text file using a stream reader.
+                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\attributes.txt"))
+                {
+                    // Read the stream to a string, and write the string to the console.
+                    while (!sr.EndOfStream)
+                    {
+                        string line = sr.ReadLine();
+                        listId.Add(line);
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(e.Message);
+            }
+            var tips = db.Tips.Where(w => w.status == 0).OrderBy(o => o.Id);
+            int countId = 0;
+            int countProgress = 0;
+            foreach(Banco.Models.Tip t in tips)
+            {
+                countId++;
+                
+                if (int.Parse(listId.ElementAt(countProgress)) == countId)
+                {
+                    t.WekaPredict = int.Parse(listaPredict.ElementAt(countProgress).ToString());
+                    countProgress++;
+                }
+            }
+            db.SaveChanges();
+            ViewBag.Teste = listId;
+            return View();
+        }
+
         public ActionResult setPositivo(int id)
         {
             Banco.Models.Tip tp = db.Tips.Find(id);
             tp.status = 1;
+            tp.UpdateDate = DateTime.Now;
             db.SaveChanges();
-            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
-
-
-            int count = qry.Count(); // 1st round-trip
-            int index = new Random().Next(count);
-
-            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
-            ViewBag.TipId = newtip.Id;
-            ViewBag.Tip = newtip.Description;
             return RedirectToAction("Index");
         }
         public ActionResult setNeutro(int id)
         {
             Banco.Models.Tip tp = db.Tips.Find(id);
             tp.status = 2;
+            tp.UpdateDate = DateTime.Now;
             db.SaveChanges();
-            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
-
-
-            int count = qry.Count(); // 1st round-trip
-            int index = new Random().Next(count);
-
-            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
-            ViewBag.TipId = newtip.Id;
-            ViewBag.Tip = newtip.Description;
             return RedirectToAction("Index");
         }
         public ActionResult setNegativo(int id)
         {
             Banco.Models.Tip tp = db.Tips.Find(id);
             tp.status = 3;
+            tp.UpdateDate = DateTime.Now;
             db.SaveChanges();
-            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o => o.Id);
-
-
-            int count = qry.Count(); // 1st round-trip
-            int index = new Random().Next(count);
-
-            Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
-            ViewBag.TipId = newtip.Id;
-            ViewBag.Tip = newtip.Description;
             return RedirectToAction("Index");
         }
         public ActionResult Index()
         {
-            var qry = db.Tips.Where(t => t.status == 0).OrderBy(o=>o.Id);
+            var qry = db.Tips.Where(t => t.status == 0 && t.Venue.tipcount >9).OrderBy(o=>o.Id);
            
 
             int count = qry.Count(); // 1st round-trip
@@ -112,6 +152,7 @@ namespace ProjetoFinal1.Controllers
             Banco.Models.Tip newtip = qry.Skip(index).FirstOrDefault(); // 2nd round-trip
             ViewBag.TipId = newtip.Id;
             ViewBag.Tip = newtip.Description;
+            ViewBag.Venue = newtip.Venue.Name;
             return View();
 
         }
