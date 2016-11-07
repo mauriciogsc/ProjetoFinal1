@@ -18,5 +18,8 @@ namespace Banco.Models
         public int VenueId { get; set; }
         public virtual Venue Venue { get; set; }
         public int status { get; set; }
+        public float AlchemyScore { get; set; }
+        public int AlchemyPredict { get; set; }
+        public int AlchemyMixed { get; set; }
     }
 }

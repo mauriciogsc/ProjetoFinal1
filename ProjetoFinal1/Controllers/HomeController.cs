@@ -8,6 +8,9 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.IO;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using System.Data.Entity;
 
 namespace ProjetoFinal1.Controllers
 {
@@ -51,6 +54,91 @@ namespace ProjetoFinal1.Controllers
                     }
                 }
             }
+            return View();
+        }
+
+        public async System.Threading.Tasks.Task<bool> GetAlchemyRate()
+        {
+            var client = new HttpClient();
+            var count = 0;
+            // Create the HttpContent for the form to be posted.
+            var tips = db.Tips.Where(w=>w.AlchemyPredict == 0 && w.status != 0);
+            foreach (Banco.Models.Tip tip  in tips)
+            {
+                var requestContent = new FormUrlEncodedContent(new[] {
+                new KeyValuePair<string, string>("text", tip.Description),
+                    });
+
+                // Get the response.
+                HttpResponseMessage response = await client.PostAsync(
+                    "https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment?apikey=ea0a5ea9d3f099773804971a60bccdfd75768e79&outputMode=json",
+                    requestContent);
+
+                // Get the response content.
+                HttpContent responseContent = response.Content;
+
+                // Get the stream of the content.
+                using (var reader = new StreamReader(await responseContent.ReadAsStreamAsync()))
+                {
+                    // Write the output.
+                    var resp = await reader.ReadToEndAsync();
+                    var jobj = JObject.Parse(resp);
+                    if (jobj["status"].ToString() == "OK" && jobj["docSentiment"]["type"] != null)
+                    {
+
+                        string Status = jobj["docSentiment"]["type"].ToString();
+                        if (Status == "negative")
+                            tip.AlchemyPredict = 3;
+                        if (Status == "positive")
+                            tip.AlchemyPredict = 1;
+                        if (Status == "neutral")
+                            tip.AlchemyPredict = 2;
+                        if (jobj["docSentiment"]["mixed"] != null)
+                            tip.AlchemyMixed = int.Parse(jobj["docSentiment"]["mixed"].ToString());
+                        if (jobj["docSentiment"]["score"] != null)
+                        {
+                            string score = jobj["docSentiment"]["score"].ToString();
+                            score = score.Replace('.', ',');
+                            tip.AlchemyScore = float.Parse(score);
+                        }
+                        db.Entry(tip).State = EntityState.Modified;
+
+                    }
+                    else
+                    {
+                        if (jobj["statusInfo"].ToString() != "unsupported-text-language")
+                        {
+                            break;
+                         }
+                    }
+                }
+            }
+
+            db.SaveChanges();
+            return true;
+        }
+
+        public ActionResult Satisfacao()
+        {
+            Banco.Models.Venue v = db.Venues.Find(131);
+            List<Banco.Models.Tip> tips = db.Tips.Where(w => w.VenueId == 131 && w.WekaPredict!=0).ToList();
+            float media = 0.0f;
+            float total = 0.0f;
+            foreach(Banco.Models.Tip t in tips)
+            {
+                if(t.WekaPredict == 1)
+                {
+                    total += 10.0f;
+                }
+                if (t.WekaPredict == 2)
+                {
+                    total += 5.0f;
+                }
+
+            }
+            media = total / tips.Count;
+            ViewBag.media = media;
+            ViewBag.tips = tips.Take(15);
             return View();
         }
 

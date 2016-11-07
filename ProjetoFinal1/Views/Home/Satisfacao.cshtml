@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewBag.Title = "Satisfacao";
+}
+<style>
+    tr td{
+        border:solid
+    }
+</style>
+<h2>Starbucks nota @ViewBag.media</h2>
+
+<table style="border:solid">
+    <tr>
+        <td>
+            Comentário
+        </td>
+        <td>
+            Classificação do modelo
+        </td>
+    </tr>
+    @foreach(var t in ViewBag.tips)
+    {
+        <tr>
+            <td>
+                @t.Description
+            </td>
+            <td>
+                @if(t.WekaPredict==1)
+                {
+                    <text>Positivo</text>
+                }
+                @if (t.WekaPredict == 2)
+                {
+                    <text>Neutro</text>
+                }
+                @if (t.WekaPredict == 3)
+                {
+                    <text>Negativo</text>
+                }
+            </td>
+        </tr>
+    }
+</table>
+

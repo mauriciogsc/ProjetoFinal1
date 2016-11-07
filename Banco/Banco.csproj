@@ -97,6 +97,14 @@
     <Compile Include="Migrations\201610242317201_WekaPredict.Designer.cs">
       <DependentUpon>201610242317201_WekaPredict.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201610261659121_AlchemyScores.cs" />
+    <Compile Include="Migrations\201610261659121_AlchemyScores.Designer.cs">
+      <DependentUpon>201610261659121_AlchemyScores.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201610261747267_ismixed.cs" />
+    <Compile Include="Migrations\201610261747267_ismixed.Designer.cs">
+      <DependentUpon>201610261747267_ismixed.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Category.cs" />
@@ -142,6 +150,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201610242317201_WekaPredict.resx">
       <DependentUpon>201610242317201_WekaPredict.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610261659121_AlchemyScores.resx">
+      <DependentUpon>201610261659121_AlchemyScores.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201610261747267_ismixed.resx">
+      <DependentUpon>201610261747267_ismixed.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
