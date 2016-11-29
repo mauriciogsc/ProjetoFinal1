@@ -15,6 +15,8 @@ namespace Banco.Models
         public int countAmigos { get; set; }
         public int countCheckin { get; set; }
         public int countTip { get; set; }
+        public float weight { get; set; }
+        public double mediaComentarios { get; set; }
         public string cidadeNatal { get; set; }
     }
 }

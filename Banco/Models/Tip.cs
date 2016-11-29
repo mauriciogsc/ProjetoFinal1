@@ -13,6 +13,7 @@ namespace Banco.Models
         public string Description { get; set; }
         public int UserId { get; set; }
         public int WekaPredict { get; set; }
+        public int WekaPredictFinal { get; set; }
         public virtual User User { get; set; }
         public DateTime UpdateDate { get; set; }
         public int VenueId { get; set; }

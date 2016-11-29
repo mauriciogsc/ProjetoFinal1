@@ -120,26 +120,86 @@ namespace ProjetoFinal1.Controllers
 
         public ActionResult Satisfacao()
         {
-            Banco.Models.Venue v = db.Venues.Find(131);
-            List<Banco.Models.Tip> tips = db.Tips.Where(w => w.VenueId == 131 && w.WekaPredict!=0).ToList();
-            float media = 0.0f;
-            float total = 0.0f;
-            foreach(Banco.Models.Tip t in tips)
-            {
-                if(t.WekaPredict == 1)
-                {
-                    total += 10.0f;
-                }
-                if (t.WekaPredict == 2)
-                {
-                    total += 5.0f;
-                }
+            List<Banco.Models.User> users = db.Users.ToList();
 
+            //números obtidos pelo sql server para essa amostra
+            double desviopadrao = 1.67239257986971;
+            double mediaTotal = 7.92828871470173;
+            foreach (Banco.Models.User u in users)
+            {
+                List<Banco.Models.Tip> tipsUser = db.Tips.Where(w => w.UserId == u.Id && w.WekaPredictFinal!=0).ToList();
+                int somaComentarios = 0;
+                foreach(Banco.Models.Tip t in tipsUser)
+                {
+                    if(t.WekaPredictFinal ==1)
+                    {
+                        somaComentarios += 10;
+                    }
+                    else if (t.WekaPredictFinal==2)
+                    {
+                        somaComentarios += 5;  
+                    }
+                }
+                if (tipsUser.Count == 0)
+                    u.mediaComentarios = 0;
+                else
+                    u.mediaComentarios = Convert.ToDouble(somaComentarios) / Convert.ToDouble(tipsUser.Count);
+                if (tipsUser.Count < 5)
+                    u.weight = 1;
+                else if (u.mediaComentarios == mediaTotal)
+                    u.weight = 3;
+                else
+                    u.weight = (3 * (float)desviopadrao) / Math.Abs((float)u.mediaComentarios - (float)mediaTotal);
+                if (u.weight > 3)
+                    u.weight = 3;
+                if (u.weight < 1)
+                    u.weight = 1;
             }
-            media = total / tips.Count;
-            ViewBag.media = media;
-            ViewBag.tips = tips.Take(15);
+            List<Banco.Models.Venue> venues = db.Venues.ToList();
+            foreach(Banco.Models.Venue v in venues)
+            {
+                List<Banco.Models.Tip> tipsVenue = db.Tips.Where(w => w.VenueId == v.Id).ToList();
+                float somaPesos=0;
+                float somaTotal =0;
+                foreach(Banco.Models.Tip t in tipsVenue)
+                {
+                    if (t.WekaPredictFinal == 1)
+                    {
+                        somaTotal += 10 * t.User.weight;
+                    }
+                    else if (t.WekaPredictFinal == 2)
+                    {
+                        somaTotal += 5 * t.User.weight;
+                    }
+                    somaPesos += t.User.weight;
+                }
+                if (somaPesos == 0)
+                    v.rateWeka = 0;
+                else
+                    v.rateWeka = (double) somaTotal / (double)somaPesos;
+            }
+            db.SaveChanges();
             return View();
+            //Banco.Models.Venue v = db.Venues.Find(131);
+            //List<Banco.Models.Tip> tips = db.Tips.Where(w => w.VenueId == 131 && w.WekaPredict!=0).ToList();
+            //float media = 0.0f;
+            //float total = 0.0f;
+            //foreach(Banco.Models.Tip t in tips)
+            //{
+            //    if(t.WekaPredict == 1)
+            //    {
+            //        total += 10.0f;
+            //    }
+            //    if (t.WekaPredict == 2)
+            //    {
+            //        total += 5.0f;
+            //    }
+
+            //}
+            //media = total / tips.Count;
+            //ViewBag.media = media;
+            //ViewBag.tips = tips.Take(15);
+            //return View();
         }
 
         public ActionResult readPredictFromFile()
@@ -148,11 +208,9 @@ namespace ProjetoFinal1.Controllers
             List<string> listId = new List<string>();
             try
             {   // Open the text file using a stream reader.
-                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\UnclassPredict.txt"))
+                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\unclasspredicaofinal.txt"))
                 {
                     // Read the stream to a string, and write the string to the console.
-                    sr.ReadLine();
-                    sr.ReadLine();
                     sr.ReadLine();
                     sr.ReadLine();
                     sr.ReadLine();
@@ -171,7 +229,7 @@ namespace ProjetoFinal1.Controllers
             }
             try
             {   // Open the text file using a stream reader.
-                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\attributes.txt"))
+                using (StreamReader sr = new StreamReader("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\Python notebook\\attributes2.txt"))
                 {
                     // Read the stream to a string, and write the string to the console.
                     while (!sr.EndOfStream)
@@ -196,7 +254,7 @@ namespace ProjetoFinal1.Controllers
                 
                 if (int.Parse(listId.ElementAt(countProgress)) == countId)
                 {
-                    t.WekaPredict = int.Parse(listaPredict.ElementAt(countProgress).ToString());
+                    t.WekaPredictFinal = int.Parse(listaPredict.ElementAt(countProgress).ToString());
                     countProgress++;
                 }
             }

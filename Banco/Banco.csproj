@@ -105,6 +105,18 @@
     <Compile Include="Migrations\201610261747267_ismixed.Designer.cs">
       <DependentUpon>201610261747267_ismixed.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611282146385_AvaliacaoFinal.cs" />
+    <Compile Include="Migrations\201611282146385_AvaliacaoFinal.Designer.cs">
+      <DependentUpon>201611282146385_AvaliacaoFinal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201611282319224_userweight.cs" />
+    <Compile Include="Migrations\201611282319224_userweight.Designer.cs">
+      <DependentUpon>201611282319224_userweight.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201611282346355_mediadoscomentariosusuarios.cs" />
+    <Compile Include="Migrations\201611282346355_mediadoscomentariosusuarios.Designer.cs">
+      <DependentUpon>201611282346355_mediadoscomentariosusuarios.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Category.cs" />
@@ -156,6 +168,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201610261747267_ismixed.resx">
       <DependentUpon>201610261747267_ismixed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611282146385_AvaliacaoFinal.resx">
+      <DependentUpon>201611282146385_AvaliacaoFinal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611282319224_userweight.resx">
+      <DependentUpon>201611282319224_userweight.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611282346355_mediadoscomentariosusuarios.resx">
+      <DependentUpon>201611282346355_mediadoscomentariosusuarios.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
