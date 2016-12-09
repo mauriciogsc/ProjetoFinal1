@@ -17,6 +17,8 @@ namespace Banco.Models
         public bool HasMenu { get; set; }
         public int checkincount { get; set; }
         public int tipcount { get; set; }
+        public double ratePesoInterno { get; set; }
+        public double rateMediaAritmetica { get; set; }
         public double rateWeka { get; set; }
         public double rate { get; set; }
         public int price { get; set; }

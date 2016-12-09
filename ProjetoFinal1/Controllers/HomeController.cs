@@ -62,8 +62,8 @@ namespace ProjetoFinal1.Controllers
             var client = new HttpClient();
             var count = 0;
             // Create the HttpContent for the form to be posted.
-            var tips = db.Tips.Where(w=>w.AlchemyPredict == 0 && w.status != 0);
-            foreach (Banco.Models.Tip tip  in tips)
+            var tips = db.Tips.Where(w => w.AlchemyPredict == 0 && w.status != 0);
+            foreach (Banco.Models.Tip tip in tips)
             {
                 var requestContent = new FormUrlEncodedContent(new[] {
                 new KeyValuePair<string, string>("text", tip.Description),
@@ -109,13 +109,27 @@ namespace ProjetoFinal1.Controllers
                         if (jobj["statusInfo"].ToString() != "unsupported-text-language")
                         {
                             break;
-                         }
+                        }
                     }
                 }
             }
 
             db.SaveChanges();
             return true;
+        }
+        private double CalculateStdDev(IEnumerable<int> values)
+        {
+            double ret = 0;
+            if (values.Count() > 0)
+            {
+                //Compute the Average      
+                double avg = values.Average();
+                //Perform the Sum of (value-avg)_2_2      
+                double sum = values.Sum(d => Math.Pow(d - avg, 2));
+                //Put it all together      
+                ret = Math.Sqrt((sum) / (values.Count() - 1));
+            }
+            return ret;
         }
 
         public ActionResult Satisfacao()
@@ -127,17 +141,17 @@ namespace ProjetoFinal1.Controllers
             double mediaTotal = 7.92828871470173;
             foreach (Banco.Models.User u in users)
             {
-                List<Banco.Models.Tip> tipsUser = db.Tips.Where(w => w.UserId == u.Id && w.WekaPredictFinal!=0).ToList();
+                List<Banco.Models.Tip> tipsUser = db.Tips.Where(w => w.UserId == u.Id && w.WekaPredictFinal != 0).ToList();
                 int somaComentarios = 0;
-                foreach(Banco.Models.Tip t in tipsUser)
+                foreach (Banco.Models.Tip t in tipsUser)
                 {
-                    if(t.WekaPredictFinal ==1)
+                    if (t.WekaPredictFinal == 1)
                     {
                         somaComentarios += 10;
                     }
-                    else if (t.WekaPredictFinal==2)
+                    else if (t.WekaPredictFinal == 2)
                     {
-                        somaComentarios += 5;  
+                        somaComentarios += 5;
                     }
                 }
                 if (tipsUser.Count == 0)
@@ -156,12 +170,12 @@ namespace ProjetoFinal1.Controllers
                     u.weight = 1;
             }
             List<Banco.Models.Venue> venues = db.Venues.ToList();
-            foreach(Banco.Models.Venue v in venues)
+            foreach (Banco.Models.Venue v in venues)
             {
                 List<Banco.Models.Tip> tipsVenue = db.Tips.Where(w => w.VenueId == v.Id).ToList();
-                float somaPesos=0;
-                float somaTotal =0;
-                foreach(Banco.Models.Tip t in tipsVenue)
+                float somaPesos = 0;
+                float somaTotal = 0;
+                foreach (Banco.Models.Tip t in tipsVenue)
                 {
                     if (t.WekaPredictFinal == 1)
                     {
@@ -176,7 +190,7 @@ namespace ProjetoFinal1.Controllers
                 if (somaPesos == 0)
                     v.rateWeka = 0;
                 else
-                    v.rateWeka = (double) somaTotal / (double)somaPesos;
+                    v.rateWeka = (double)somaTotal / (double)somaPesos;
             }
             db.SaveChanges();
             return View();
@@ -200,6 +214,180 @@ namespace ProjetoFinal1.Controllers
             //ViewBag.media = media;
             //ViewBag.tips = tips.Take(15);
             //return View();
+        }
+
+        public void WriteARFF()
+        {
+
+            // Write the string to a file.
+            System.IO.StreamWriter file = new System.IO.StreamWriter("C:\\Users\\Avell B155 MAX\\Documents\\facul\\projetofinal\\lasttestDuasClassesMedianaComp.arff");
+            file.WriteLine("% 1. Title: Sentiment Analysis\n");
+            file.WriteLine("@RELATION tips\n");
+            file.WriteLine("@ATTRIBUTE sent1        NUMERIC");
+            file.WriteLine("@ATTRIBUTE sent2        NUMERIC");
+            file.WriteLine("@ATTRIBUTE sent3        NUMERIC");
+            file.WriteLine("@ATTRIBUTE sent4        NUMERIC");
+            file.WriteLine("@ATTRIBUTE sent5        NUMERIC");
+            file.WriteLine("@ATTRIBUTE mean1        NUMERIC");
+            file.WriteLine("@ATTRIBUTE mean2        NUMERIC");
+            file.WriteLine("@ATTRIBUTE mean3        NUMERIC");
+            file.WriteLine("@ATTRIBUTE mean4        NUMERIC");
+            file.WriteLine("@ATTRIBUTE mean5        NUMERIC");
+            file.WriteLine("@ATTRIBUTE stdv1        NUMERIC");
+            file.WriteLine("@ATTRIBUTE stdv2        NUMERIC");
+            file.WriteLine("@ATTRIBUTE stdv3        NUMERIC");
+            file.WriteLine("@ATTRIBUTE stdv4        NUMERIC");
+            file.WriteLine("@ATTRIBUTE stdv5        NUMERIC");
+            file.WriteLine("@ATTRIBUTE class        {0,1}\n");
+            file.WriteLine("@DATA");
+            var tips = db.Tips.Where(w => w.Venue.rate != 0 && w.WekaPredictFinal != 0).GroupBy(g => g.VenueId);
+           
+            foreach (var g in tips)
+            {
+                string line = "";
+                List<int> sents = new List<int>();
+                List<double> means = new List<double>();
+                List<float> stdvs = new List<float>();
+                string classe = "0";
+                if (g.Count() > 4)
+                {
+                    Banco.Models.Venue v = db.Venues.Find(g.Key);
+                    //if (v.rate < 5)
+                    //    classe = "0";
+                    //else if (v.rate >= 5 && v.rate <= 6)
+                    //    classe = "1";
+                    //else if (v.rate > 6 && v.rate <= 8)
+                    //    classe = "2";
+                    //else
+                    //    classe = "3";
+                    classe = v.rate > 6.9 ? "1" : "0";
+                    foreach (var t in g.Take(5))
+                    {
+                        sents.Add(t.WekaPredictFinal);
+                        if (t.User.pesoInterno != 1)
+                        {
+                            means.Add(t.User.mediaComentarios);
+                            stdvs.Add(t.User.pesoInterno);
+                        }
+                    }
+                    if (means.Count != 0)
+                    {
+                        if (means.Count != 5)
+                        {
+                            int cont = means.Count;
+                            for (int i = 0; i < 5 - cont; i++)
+                            {
+                                means.Add(means.Sum() / means.Count);
+                                stdvs.Add(stdvs.Sum() / stdvs.Count);
+                            }
+                        }
+                        foreach (int sent in sents)
+                        {
+                            line += sent.ToString() + ",";
+                        }
+                        foreach (double mean in means)
+                        {
+                            line += mean.ToString().Replace(',', '.') + ",";
+                        }
+                        foreach (float stdv in stdvs)
+                        {
+                            line += stdv.ToString().Replace(',', '.') + ",";
+                        }
+                        line += classe;
+                        file.WriteLine(line);
+                    }
+                }
+            }
+
+            file.Close();
+        }
+
+        public void SatisfacaoInterna()
+        {
+            List<Banco.Models.User> users = db.Users.ToList();
+
+            foreach (Banco.Models.User u in users)
+            {
+                List<Banco.Models.Tip> tipsUser = db.Tips.Where(w => w.UserId == u.Id && w.WekaPredictFinal != 0).ToList();
+                List<int> listaDesvio = new List<int>();
+                foreach (Banco.Models.Tip t in tipsUser)
+                {
+                    if (t.WekaPredictFinal == 1)
+                    {
+                        listaDesvio.Add(10);
+                    }
+                    else if (t.WekaPredictFinal == 2)
+                    {
+                        listaDesvio.Add(5);
+                    }
+                    else
+                        listaDesvio.Add(0);
+                }
+                if (tipsUser.Count < 6)
+                    u.pesoInterno = 1;
+                else
+                    u.pesoInterno = (float)CalculateStdDev(listaDesvio);
+                //if (u.pesoInterno < 3)
+                //    u.pesoInterno = 1;
+                //else if (u.pesoInterno >= 3 && u.pesoInterno <= 4)
+                //    u.pesoInterno = 2;
+                //else if (u.pesoInterno > 4)
+                //    u.pesoInterno = 3;
+            }
+            db.SaveChanges();
+            List<Banco.Models.Venue> venues = db.Venues.ToList();
+            foreach (Banco.Models.Venue v in venues)
+            {
+                List<Banco.Models.Tip> tipsVenue = db.Tips.Where(w => w.VenueId == v.Id).ToList();
+                float somaPesos = 0;
+                float somaTotal = 0;
+                foreach (Banco.Models.Tip t in tipsVenue)
+                {
+                    if (t.WekaPredictFinal == 1)
+                    {
+                        somaTotal += 10 * t.User.pesoInterno;
+                    }
+                    else if (t.WekaPredictFinal == 2)
+                    {
+                        somaTotal += 5 * t.User.pesoInterno;
+                    }
+                    somaPesos += t.User.pesoInterno;
+                }
+                if (somaPesos == 0)
+                    v.ratePesoInterno = 0;
+                else
+                    v.ratePesoInterno = somaTotal / (double)somaPesos;
+            }
+            db.SaveChanges();
+        }
+
+        public void satisfacaoSemPonderar()
+        {
+
+            List<Banco.Models.Venue> venues = db.Venues.ToList();
+            foreach (Banco.Models.Venue v in venues)
+            {
+                List<Banco.Models.Tip> tipsVenue = db.Tips.Where(w => w.VenueId == v.Id).ToList();
+                int count = 0;
+                float somaTotal = 0;
+                foreach (Banco.Models.Tip t in tipsVenue)
+                {
+                    if (t.WekaPredictFinal == 1)
+                    {
+                        somaTotal += 10;
+                    }
+                    else if (t.WekaPredictFinal == 2)
+                    {
+                        somaTotal += 5;
+                    }
+                    count++;
+                }
+                if (count == 0)
+                    v.rateMediaAritmetica = 0;
+                else
+                    v.rateMediaAritmetica = (double)somaTotal / count;
+            }
+            db.SaveChanges();
         }
 
         public ActionResult readPredictFromFile()
@@ -248,10 +436,10 @@ namespace ProjetoFinal1.Controllers
             var tips = db.Tips.Where(w => w.status == 0).OrderBy(o => o.Id);
             int countId = 0;
             int countProgress = 0;
-            foreach(Banco.Models.Tip t in tips)
+            foreach (Banco.Models.Tip t in tips)
             {
                 countId++;
-                
+
                 if (int.Parse(listId.ElementAt(countProgress)) == countId)
                 {
                     t.WekaPredictFinal = int.Parse(listaPredict.ElementAt(countProgress).ToString());
@@ -289,8 +477,8 @@ namespace ProjetoFinal1.Controllers
         }
         public ActionResult Index()
         {
-            var qry = db.Tips.Where(t => t.status == 0 && t.Venue.tipcount >9).OrderBy(o=>o.Id);
-           
+            var qry = db.Tips.Where(t => t.status == 0 && t.Venue.tipcount > 9).OrderBy(o => o.Id);
+
 
             int count = qry.Count(); // 1st round-trip
             int index = new Random().Next(count);

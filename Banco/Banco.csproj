@@ -117,6 +117,10 @@
     <Compile Include="Migrations\201611282346355_mediadoscomentariosusuarios.Designer.cs">
       <DependentUpon>201611282346355_mediadoscomentariosusuarios.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611292249594_novasmetricas.cs" />
+    <Compile Include="Migrations\201611292249594_novasmetricas.Designer.cs">
+      <DependentUpon>201611292249594_novasmetricas.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BancoContext.cs" />
     <Compile Include="Models\Category.cs" />
@@ -177,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201611282346355_mediadoscomentariosusuarios.resx">
       <DependentUpon>201611282346355_mediadoscomentariosusuarios.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611292249594_novasmetricas.resx">
+      <DependentUpon>201611292249594_novasmetricas.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
